@@ -8,7 +8,7 @@
   "description": "Afinador de guitarra sin anuncios y ligero.",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3063/3063623.png",
+      "src": "tuner_icon-png",
       "sizes": "512x512",
       "type": "image/png"
     }
