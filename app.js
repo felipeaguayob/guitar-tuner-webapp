@@ -102,8 +102,10 @@ function autoCorrelate(buffer, sampleRate) {
 // 4. Bucle de actualización visual
 // --- NUEVAS VARIABLES DE CONTROL ---
 let lastFrequencies = []; // Para el promedio móvil
-const SMOOTHING_SAMPLES = 10; // Cantidad de muestras para suavizar
+
 const TOLERANCIA_CENTS = 5; 
+const SMOOTHING_SAMPLES = 25; // Antes era 10 o 15
+let lastStableFrequency = null;
 
 function getAverageFrequency(newFreq) {
     lastFrequencies.push(newFreq);
@@ -122,6 +124,13 @@ function updateTuner() {
     if (rawFrequency !== -1 && isFinite(rawFrequency) && rawFrequency > 60 && rawFrequency < 1000) {
         
         // 2. Aplicar Suavizado (Smoothing)
+        if (lastStableFrequency && Math.abs(rawFrequency - lastStableFrequency) > (lastStableFrequency * 0.15)) {
+            // Ignoramos esta lectura momentáneamente
+            rawFrequency = lastStableFrequency; 
+        }
+        
+        lastStableFrequency = rawFrequency;
+        
         const frequency = getAverageFrequency(rawFrequency);
         
         freqDisplay.innerText = `Frecuencia: ${frequency.toFixed(2)} Hz`;
@@ -151,6 +160,7 @@ function updateTuner() {
     } else {
         // Si no hay sonido claro, vamos vaciando el promedio poco a poco
         if (lastFrequencies.length > 0) lastFrequencies.shift();
+        lastStableFrequency = null;
     }
 
     requestAnimationFrame(updateTuner);
