@@ -8,9 +8,10 @@
   "description": "Afinador de guitarra sin anuncios y ligero.",
   "icons": [
     {
-      "src": "tuner_icon-png",
+      "src": "tuner_icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }
   ]
+
 }
