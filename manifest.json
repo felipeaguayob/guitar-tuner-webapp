@@ -1,5 +1,5 @@
 {
-  "name": "Guitar Tuner",
+  "name": "Guitar Tuner Pro",
   "short_name": "Tuner",
   "start_url": "index.html",
   "display": "standalone",
@@ -8,10 +8,9 @@
   "description": "Afinador de guitarra sin anuncios y ligero.",
   "icons": [
     {
-      "src": "tuner_icon.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/3063/3063623.png",
       "sizes": "512x512",
       "type": "image/png"
     }
   ]
-
 }

@@ -1,5 +1,4 @@
 const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-const TOLERANCIA_CENTS = 5;
 
 // Variables para el suavizado fluido
 let smoothedFrequency = 0;
@@ -40,39 +39,56 @@ startBtn.onclick = async () => {
     }
 };
 
+let lastFrequencies = []; // Para el promedio móvil
+const SMOOTHING_SAMPLES = 10; // Cantidad de muestras para suavizar
+const TOLERANCIA_CENTS = 5;
+
+function getAverageFrequency(newFreq) {
+    lastFrequencies.push(newFreq);
+    if (lastFrequencies.length > SMOOTHING_SAMPLES) {
+        lastFrequencies.shift();
+    }
+    // Calcular el promedio
+    return lastFrequencies.reduce((a, b) => a + b) / lastFrequencies.length;
+}
+
 function updateTuner() {
     analyser.getFloatTimeDomainData(dataArray);
     let rawFrequency = autoCorrelate(dataArray, audioContext.sampleRate);
 
-    // Filtro de rango de guitarra y volumen
-    if (rawFrequency > 60 && rawFrequency < 1000) {
+    // 1. Filtrar ruido y frecuencias absurdas para guitarra (Rango: 60Hz a 1000Hz)
+    if (rawFrequency !== -1 && isFinite(rawFrequency) && rawFrequency > 60 && rawFrequency < 1000) {
         
-        // --- LA MAGIA DEL SUAVIZADO ---
-        if (smoothedFrequency === 0) {
-            smoothedFrequency = rawFrequency; // Primera detección
-        } else {
-            // "Leaky Integrator": La nueva frecuencia es un 20% de la actual y 80% de la anterior
-            smoothedFrequency = (rawFrequency * SMOOTHING_FACTOR) + (smoothedFrequency * (1 - SMOOTHING_FACTOR));
-        }
-
-        const noteData = getNoteFromFrequency(smoothedFrequency);
-        const centsOff = 1200 * Math.log2(smoothedFrequency / noteData.expectedFreq);
+        // 2. Aplicar Suavizado (Smoothing)
+        const frequency = getAverageFrequency(rawFrequency);
         
-        // Actualizar Interfaz
+        freqDisplay.innerText = `Frecuencia: ${frequency.toFixed(2)} Hz`;
+        
+        const noteData = getNoteFromFrequency(frequency);
         noteDisplay.innerText = noteData.name;
-        freqDisplay.innerText = `Frecuencia: ${smoothedFrequency.toFixed(1)} Hz`;
+
+        // 3. Cálculo de Cents con la nueva frecuencia promediada
+        const centsOff = 1200 * Math.log2(frequency / noteData.expectedFreq);
         
-        let position = 50 + centsOff;
+        // Mapeo: El centro es 50%. 
+        // Dividimos por 2 para que la aguja no sea tan nerviosa (rango visual de +-50 cents)
+        let position = 50 + (centsOff); 
         position = Math.max(0, Math.min(100, position));
+        
+        // Aplicamos la posición con una transición suave en CSS (opcional)
         indicator.style.left = `${position}%`;
 
+        // 4. Lógica de Color (Zona de éxito)
         if (Math.abs(centsOff) < TOLERANCIA_CENTS) {
-            indicator.style.background = "#00e676";
+            indicator.style.background = "#00e676"; 
             noteDisplay.style.color = "#00e676";
         } else {
-            indicator.style.background = "#ff5252";
+            indicator.style.background = "#ff5252"; 
             noteDisplay.style.color = "#ffffff";
         }
+    } else {
+        // Si no hay sonido claro, vamos vaciando el promedio poco a poco
+        if (lastFrequencies.length > 0) lastFrequencies.shift();
     }
 
     requestAnimationFrame(updateTuner);
