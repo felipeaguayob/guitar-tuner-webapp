@@ -79,25 +79,72 @@ function updateTuner() {
 }
 
 // Algoritmo de autocorrelación estándar (el que te funcionaba antes)
+// function autoCorrelate(buffer, sampleRate) {
+//     let size = buffer.length;
+//     let rms = 0;
+//     for (let i = 0; i < size; i++) rms += buffer[i] * buffer[i];
+//     if (Math.sqrt(rms / size) < 0.01) return -1;
+
+//     let bestOffset = -1;
+//     let bestCorrelation = 0;
+//     let maxSamples = Math.floor(size / 2);
+    
+//     for (let offset = 0; offset < maxSamples; offset++) {
+//         let correlation = 0;
+//         for (let i = 0; i < maxSamples; i++) {
+//             correlation += Math.abs(buffer[i] - buffer[i + offset]);
+//         }
+//         if (bestOffset === -1 || correlation < bestCorrelation) {
+//             bestCorrelation = correlation;
+//             bestOffset = offset;
+//         }
+//     }
+//     return sampleRate / bestOffset;
+// }
+
 function autoCorrelate(buffer, sampleRate) {
     let size = buffer.length;
     let rms = 0;
-    for (let i = 0; i < size; i++) rms += buffer[i] * buffer[i];
-    if (Math.sqrt(rms / size) < 0.01) return -1;
 
-    let bestOffset = -1;
-    let bestCorrelation = 0;
-    let maxSamples = Math.floor(size / 2);
-    
-    for (let offset = 0; offset < maxSamples; offset++) {
-        let correlation = 0;
-        for (let i = 0; i < maxSamples; i++) {
-            correlation += Math.abs(buffer[i] - buffer[i + offset]);
-        }
-        if (bestOffset === -1 || correlation < bestCorrelation) {
-            bestCorrelation = correlation;
-            bestOffset = offset;
+    // 1. Calcular el volumen (Root Mean Square)
+    for (let i = 0; i < size; i++) {
+        rms += buffer[i] * buffer[i];
+    }
+    rms = Math.sqrt(rms / size);
+
+    // Si el volumen es muy bajo (silencio), no procesar
+    if (rms < 0.1) return -1; 
+
+    // 2. Recortar la señal para eliminar ruido de los bordes
+    let r1 = 0, r2 = size - 1, thres = 0.2;
+    for (let i = 0; i < size / 2; i++) if (Math.abs(buffer[i]) < thres) { r1 = i; break; }
+    for (let i = 1; i < size / 2; i++) if (Math.abs(buffer[size - i]) < thres) { r2 = size - i; break; }
+    let bufferTrimmed = buffer.slice(r1, r2);
+    let sizeTrimmed = bufferTrimmed.length;
+
+    // 3. Autocorrelación
+    let c = new Array(sizeTrimmed).fill(0);
+    for (let i = 0; i < sizeTrimmed; i++) {
+        for (let j = 0; j < sizeTrimmed - i; j++) {
+            c[i] = c[i] + bufferTrimmed[j] * bufferTrimmed[j + i];
         }
     }
-    return sampleRate / bestOffset;
+
+    // Buscar el primer pico después del descenso inicial
+    let d = 0;
+    while (c[d] > c[d + 1]) d++;
+    let maxval = -1, maxpos = -1;
+    for (let i = d; i < sizeTrimmed; i++) {
+        if (c[i] > maxval) {
+            maxval = c[i];
+            maxpos = i;
+        }
+    }
+
+    // 4. Validación de seguridad contra el "Infinity"
+    if (maxpos > 0) {
+        return sampleRate / maxpos;
+    } else {
+        return -1;
+    }
 }
