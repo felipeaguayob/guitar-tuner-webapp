@@ -1,0 +1,67 @@
+/* Centrado total y fondo oscuro */
+body {
+    background-color: #121212;
+    color: #ffffff;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+}
+
+/* El círculo donde aparecerá la nota (E, A, D, etc.) */
+#note-display {
+    font-size: 5rem;
+    font-weight: bold;
+    color: #00e676; /* Verde neón */
+    margin: 20px 0;
+}
+
+/* Contenedor de la barra (actualizado) */
+.meter {
+    width: 100%;
+    height: 12px; /* Un poco más gruesa */
+    background: #333;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+/* El rectángulo gris claro que marca el rango de afinación */
+.target-range {
+    position: absolute;
+    left: 45%; /* Centrado (50% - 5% de ancho) */
+    width: 10%; /* Representa ±5 cents si el total es 100 */
+    height: 100%;
+    background: rgba(255, 255, 255, 0.15); /* Gris levemente claro */
+    /* border-left: 1px solid rgba(255, 255, 255, 0.15);
+    border-right: 1px solid rgba(255, 255, 255, 0.15); */
+}
+
+/* El indicador que se moverá de izquierda a derecha */
+#indicator {
+    width: 4px;
+    height: 100%;
+    background: #ff5252; /* Rojo para indicar desajuste */
+    position: absolute;
+    left: 50%; /* Centro */
+    transition: left 0.1s linear;
+}
+
+button {
+    background-color: #00e676;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    border-radius: 25px;
+    cursor: pointer;
+    margin-top: 30px;
+}

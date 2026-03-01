@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guitar Tuner</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121212">
+    <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+    }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Guitar Tuner</h1>
+        
+        <div id="note-display">--</div>
+        
+        <div class="meter">
+            <div class="target-range"></div> <div id="indicator"></div>
+        </div>
+
+        <p id="frequency">Frecuencia: 0 Hz</p>
+
+        <button id="start-btn">Iniciar Afinador</button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
