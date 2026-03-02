@@ -1,5 +1,6 @@
 const CACHE_NAME = 'tuner-v1';
 const ASSETS = [
+  './',
   'index.html',
   'style.css',
   'app.js',
@@ -21,4 +22,5 @@ self.addEventListener('fetch', (e) => {
   );
 
 });
+
 
