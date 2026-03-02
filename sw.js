@@ -3,7 +3,8 @@ const ASSETS = [
   'index.html',
   'style.css',
   'app.js',
-  'manifest.json'
+  'manifest.json'.
+  'icon-512.png'
 ];
 
 // Instalar y guardar archivos en caché
@@ -18,4 +19,5 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((res) => res || fetch(e.request))
   );
+
 });
